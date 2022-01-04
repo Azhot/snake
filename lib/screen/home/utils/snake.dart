@@ -1,58 +1,69 @@
+import 'dart:math';
+
 import 'package:snake/screen/home/utils/direction.dart';
-import 'package:snake/screen/home/utils/position.dart';
 
 class Snake {
   // variables
-  final List<Position> body;
-  final List<Position> _temp;
+  final List<int> indexes;
+  final List<int> _temp = [];
+  final int _gridSides;
 
   // constructors
-  Snake(this.body) : _temp = [];
+  Snake(this._gridSides) : indexes = [((pow((_gridSides), 2) - 1) / 2).ceil()];
 
   // getters
-  Position get head => body.first;
-  Position get tail => body.last;
-  int get length => body.length;
+  int get start => ((pow((_gridSides), 2) - 1) / 2).ceil();
+  int get head => indexes.first;
+  int get tail => indexes.last;
+  int get length => indexes.length;
 
   // functions
-  void eat(Position target) => _temp.add(target);
+  void eat(int target) => _temp.add(target);
 
-  bool isOn(Position target) => head == target;
+  bool isOn(int target) => head == target;
 
-  bool contains(Position target) => body.contains(target);
+  bool contains(int target) => indexes.contains(target);
 
-  bool eatsHimself() => body.getRange(1, body.length).contains(head);
-
-  void updateSize() {
-    if (_temp.isNotEmpty && _temp.first == tail) {
-      body.add(_temp.removeAt(0));
-    }
-  }
+  bool eatsHimself() => indexes.getRange(1, indexes.length).contains(head);
 
   void updatePosition(Direction direction) {
+    updateSize();
     for (int i = length - 1; i > 0; i--) {
-      body[i] = body[i - 1].copyWith();
+      indexes[i] = indexes[i - 1];
     }
     switch (direction) {
       case Direction.right:
-        head.xAxis++;
+        {
+          if ((head + 1) % _gridSides == 0) throw Exception('Collision!');
+          indexes[0]++;
+        }
         break;
       case Direction.left:
-        head.xAxis--;
+        {
+          if ((head) % _gridSides == 0) throw Exception('Collision!');
+          indexes[0]--;
+        }
         break;
       case Direction.up:
-        head.yAxis--;
+        indexes[0] = indexes.first - _gridSides;
         break;
       case Direction.down:
-        head.yAxis++;
+        indexes[0] = indexes.first + _gridSides;
         break;
       default:
         break;
     }
   }
 
-  bool isOff(List<List> list) => (head.yAxis < 0 ||
-      head.yAxis > list.length - 1 ||
-      head.xAxis < 0 ||
-      head.xAxis > list[0].length - 1);
+  void updateSize() {
+    if (_temp.isNotEmpty && _temp.first == tail) {
+      indexes.add(_temp.removeAt(0));
+    }
+  }
+
+  void reset() {
+    indexes.clear();
+    _temp.clear();
+    indexes.add(start);
+  }
 }

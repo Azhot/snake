@@ -1,17 +1,19 @@
 import 'dart:async';
-import 'dart:math';
+import 'dart:math' show Random;
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:snake/screen/home/utils/position.dart';
+import 'package:snake/screen/home/utils/direction.dart';
 import 'package:snake/screen/home/utils/snake.dart';
-import 'package:snake/screen/home/widgets/snake_controller.dart';
+import 'package:snake/screen/home/widgets/snake_game_controller.dart';
 import 'package:snake/screen/home/widgets/snake_grid.dart';
+import 'package:snake/screen/home/widgets/snake_grid_controller.dart';
 import 'package:snake/shared/snake_colors.dart';
 
-import 'utils/direction.dart';
-
 class SnakeHomePage extends StatefulWidget {
+  // const
+  static const int _gridSides = 15;
+
   // constructors
   const SnakeHomePage({Key? key}) : super(key: key);
 
@@ -23,23 +25,20 @@ class SnakeHomePage extends StatefulWidget {
 // state class
 class _SnakeHomePageState extends State<SnakeHomePage> {
   // variables
-  late List<List<bool?>> _grid;
+  late final Random _random;
+  late final SnakeGridController _gridController;
   late Snake _snake;
   late Direction _direction;
   Timer? _timer;
-  late Random _random;
-  late Position _target;
 
   // overrides
   @override
   void initState() {
     super.initState();
-    _grid = List.generate(15, (index) => List.generate(15, (index) => null));
-    _grid[7][7] = true;
-    _direction = Direction.right;
-    _snake = Snake([Position(7, 7)]);
     _random = Random();
-    _target = createNewTarget();
+    _gridController = SnakeGridController();
+    _snake = Snake(SnakeHomePage._gridSides);
+    _direction = Direction.right;
   }
 
   @override
@@ -58,8 +57,8 @@ class _SnakeHomePageState extends State<SnakeHomePage> {
                     color: Colors.green,
                     fontSize: 46,
                   )),
-              SnakeGrid(_grid),
-              SnakeController(
+              SnakeGrid(SnakeHomePage._gridSides, _snake, _gridController),
+              SnakeGameController(
                 start: start,
                 goRight: goRight,
                 goLeft: goLeft,
@@ -72,12 +71,9 @@ class _SnakeHomePageState extends State<SnakeHomePage> {
       );
 
   // functions
-  Position createNewTarget() {
-    Position position = Position(
-      _random.nextInt(_grid.length),
-      _random.nextInt(_grid.length),
-    );
-    return !_snake.contains(position) ? position : createNewTarget();
+  int createNewTarget() {
+    int target = _random.nextInt(15 * 15);
+    return !_snake.contains(target) ? target : createNewTarget();
   }
 
   void goRight() {
@@ -106,43 +102,31 @@ class _SnakeHomePageState extends State<SnakeHomePage> {
 
   void start() {
     if (_timer?.isActive == true) return;
-    _timer = Timer.periodic(const Duration(milliseconds: 250), (timer) {
-      setState(() {
-        _snake.updateSize();
-        _snake.updatePosition(_direction);
-        if (_snake.isOff(_grid)) return reset();
-        iterateOverGrid();
-      });
-    });
+    reset();
+    gameLoop(createNewTarget());
   }
 
-  void iterateOverGrid() {
-    for (int yAxis = 0; yAxis < _grid.length; yAxis++) {
-      for (int xAxis = 0; xAxis < _grid[yAxis].length; xAxis++) {
-        _grid[yAxis][xAxis] =
-            _snake.contains(Position(yAxis, xAxis)) ? true : null;
-        _target.activateOn(_grid);
-        if (_snake.isOn(_target)) {
-          _snake.eat(_target);
-          _target = createNewTarget();
-        }
-        if (_snake.eatsHimself()) return reset();
+  void gameLoop(int target) {
+    _gridController.showTarget?.call(target);
+    _timer = Timer.periodic(const Duration(milliseconds: 250), (timer) {
+      try {
+        _gridController.moveSnake?.call(_direction);
+      } catch (e) {
+        _timer?.cancel();
       }
-    }
+      if (_snake.isOn(target)) {
+        _snake.eat(target);
+        target = createNewTarget();
+        _gridController.showTarget?.call(target);
+      }
+      if (_snake.eatsHimself()) _timer?.cancel();
+    });
   }
 
   void reset() {
-    _timer?.cancel();
-    setState(() {
-      for (int yAxis = 0; yAxis < _grid.length; yAxis++) {
-        for (int xAxis = 0; xAxis < _grid[yAxis].length; xAxis++) {
-          _grid[yAxis][xAxis] =
-              _snake.contains(Position(yAxis, xAxis)) ? false : null;
-        }
-      }
-    });
-    _snake = Snake([Position(7, 7)]);
+    _gridController.reset?.call();
+    _snake.reset();
+    _gridController.showSnake?.call();
     _direction = Direction.right;
-    _target = createNewTarget();
   }
 }

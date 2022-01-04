@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:snake/shared/snake_colors.dart';
 
-class SnakeController extends StatelessWidget {
+class SnakeGameController extends StatelessWidget {
   // variables
   final Function() start;
   final Function() goRight;
@@ -10,7 +10,7 @@ class SnakeController extends StatelessWidget {
   final Function() goDown;
 
   // constructors
-  const SnakeController(
+  const SnakeGameController(
       {required this.start,
       required this.goRight,
       required this.goLeft,
@@ -53,7 +53,7 @@ class SnakeController extends StatelessWidget {
           child: Icon(
             iconData,
             color: Colors.green,
-            size: 48,
+            size: 64,
           ),
         ),
       );
