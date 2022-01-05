@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' show Random;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:snake/screen/home/utils/direction.dart';
 import 'package:snake/screen/home/utils/snake.dart';
@@ -12,8 +13,8 @@ import 'package:snake/shared/snake_colors.dart';
 
 class SnakeHomePage extends StatefulWidget {
   // const
-  static const int _gridSides = 15;
-  static const int _milliseconds = 250;
+  static const int _gridSides = 19;
+  static const int _milliseconds = 150;
 
   // constructors
   const SnakeHomePage({Key? key}) : super(key: key);
@@ -36,6 +37,7 @@ class _SnakeHomePageState extends State<SnakeHomePage> {
   @override
   void initState() {
     super.initState();
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     _random = Random();
     _gridController = SnakeGridController();
     _snake = Snake(SnakeHomePage._gridSides);
@@ -43,30 +45,46 @@ class _SnakeHomePageState extends State<SnakeHomePage> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    SystemChrome.setPreferredOrientations([...DeviceOrientation.values]);
+  }
+
+  @override
   Widget build(BuildContext context) => Scaffold(
         backgroundColor: SnakeColors.primaryDark,
-        body: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const SizedBox(
-                height: 24,
-              ),
-              Text('snake',
-                  style: GoogleFonts.pressStart2p(
-                    color: Colors.green,
-                    fontSize: 46,
-                  )),
-              SnakeGrid(SnakeHomePage._gridSides, _snake, _gridController),
-              SnakeGameController(
-                start: start,
-                goRight: () => _direction = Direction.right,
-                goLeft: () => _direction = Direction.left,
-                goUp: () => _direction = Direction.up,
-                goDown: () => _direction = Direction.down,
-              ),
-            ],
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const SizedBox(height: 16),
+                Text('snake',
+                    style: GoogleFonts.pressStart2p(
+                      color: Colors.green,
+                      fontSize: 46,
+                    )),
+                const SizedBox(height: 16),
+                Expanded(
+                    child: Center(
+                  child: AspectRatio(
+                    aspectRatio: 1,
+                    child: SnakeGrid(
+                        SnakeHomePage._gridSides, _snake, _gridController),
+                  ),
+                )),
+                const SizedBox(height: 16),
+                SnakeGameController(
+                  start: start,
+                  goRight: () => _direction = Direction.right,
+                  goLeft: () => _direction = Direction.left,
+                  goUp: () => _direction = Direction.up,
+                  goDown: () => _direction = Direction.down,
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
           ),
         ),
       );

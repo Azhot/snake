@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:snake/screen/home/utils/direction.dart';
 
 class Snake {
@@ -9,13 +7,16 @@ class Snake {
   final int _gridSides;
 
   // constructors
-  Snake(this._gridSides) : indexes = [((pow((_gridSides), 2) - 1) / 2).ceil()];
+  Snake(this._gridSides) : indexes = [centerSnake(_gridSides)];
 
   // getters
-  int get start => ((pow((_gridSides), 2) - 1) / 2).ceil();
   int get head => indexes.first;
   int get tail => indexes.last;
   int get length => indexes.length;
+
+  // static functions
+  static int centerSnake(int gridSides) =>
+      ((gridSides + 1 - gridSides % 2) * gridSides / 2 - 1).ceil();
 
   // functions
   void eat(int target) => _temp.add(target);
@@ -64,6 +65,6 @@ class Snake {
   void reset() {
     indexes.clear();
     _temp.clear();
-    indexes.add(start);
+    indexes.add(centerSnake(_gridSides));
   }
 }

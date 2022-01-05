@@ -15,7 +15,7 @@ class SnakeBrick extends StatelessWidget {
           aspectRatio: 1,
           child: Container(
             color: selectColor(),
-            margin: const EdgeInsets.all(1),
+            margin: const EdgeInsets.all(0.1),
           ),
         ),
       );
@@ -25,11 +25,11 @@ class SnakeBrick extends StatelessWidget {
       case SnakeBrickType.empty:
         return SnakeColors.primaryDark;
       case SnakeBrickType.head:
-        return SnakeColors.head;
+        return SnakeColors.greenDark;
       case SnakeBrickType.body:
-        return SnakeColors.body;
+        return SnakeColors.greenLight;
       case SnakeBrickType.tail:
-        return SnakeColors.tail;
+        return SnakeColors.green;
       case SnakeBrickType.target:
         return SnakeColors.target;
       default:
