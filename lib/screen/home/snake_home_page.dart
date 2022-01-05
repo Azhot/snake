@@ -13,6 +13,7 @@ import 'package:snake/shared/snake_colors.dart';
 class SnakeHomePage extends StatefulWidget {
   // const
   static const int _gridSides = 15;
+  static const int _milliseconds = 250;
 
   // constructors
   const SnakeHomePage({Key? key}) : super(key: key);
@@ -60,10 +61,10 @@ class _SnakeHomePageState extends State<SnakeHomePage> {
               SnakeGrid(SnakeHomePage._gridSides, _snake, _gridController),
               SnakeGameController(
                 start: start,
-                goRight: goRight,
-                goLeft: goLeft,
-                goUp: goUp,
-                goDown: goDown,
+                goRight: () => _direction = Direction.right,
+                goLeft: () => _direction = Direction.left,
+                goUp: () => _direction = Direction.up,
+                goDown: () => _direction = Direction.down,
               ),
             ],
           ),
@@ -76,41 +77,29 @@ class _SnakeHomePageState extends State<SnakeHomePage> {
     return !_snake.contains(target) ? target : createNewTarget();
   }
 
-  void goRight() {
-    if (_direction != Direction.right && _direction != Direction.left) {
-      _direction = Direction.right;
-    }
-  }
-
-  void goLeft() {
-    if (_direction != Direction.right && _direction != Direction.left) {
-      _direction = Direction.left;
-    }
-  }
-
-  void goUp() {
-    if (_direction != Direction.up && _direction != Direction.down) {
-      _direction = Direction.up;
-    }
-  }
-
-  void goDown() {
-    if (_direction != Direction.up && _direction != Direction.down) {
-      _direction = Direction.down;
-    }
-  }
-
   void start() {
     if (_timer?.isActive == true) return;
     reset();
-    gameLoop(createNewTarget());
+    gameLoop(createNewTarget(), _direction);
   }
 
-  void gameLoop(int target) {
+  void gameLoop(int target, Direction tempDir) {
     _gridController.showTarget?.call(target);
-    _timer = Timer.periodic(const Duration(milliseconds: 250), (timer) {
+    _timer = Timer.periodic(
+        const Duration(
+          milliseconds: SnakeHomePage._milliseconds,
+        ), (timer) {
       try {
-        _gridController.moveSnake?.call(_direction);
+        if (((tempDir == Direction.right || tempDir == Direction.left) &&
+                (_direction == Direction.right ||
+                    _direction == Direction.left)) ||
+            ((tempDir == Direction.up || tempDir == Direction.down) &&
+                (_direction == Direction.up || _direction == Direction.down))) {
+          _gridController.moveSnake?.call(tempDir);
+        } else {
+          _gridController.moveSnake?.call(_direction);
+          tempDir = _direction;
+        }
       } catch (e) {
         _timer?.cancel();
       }
