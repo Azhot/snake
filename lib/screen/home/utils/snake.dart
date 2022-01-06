@@ -1,70 +1,82 @@
+import 'package:snake/screen/home/utils/collision_exception.dart';
 import 'package:snake/screen/home/utils/direction.dart';
 
 class Snake {
   // variables
-  final List<int> indexes;
-  final List<int> _temp = [];
-  final int _gridSides;
+  final List<int> positionsOnGrid;
+  final List<int> _eatenTargets = [];
+  final int _gridSidesLength;
 
   // constructors
-  Snake(this._gridSides) : indexes = [centerSnake(_gridSides)];
+  Snake(this._gridSidesLength)
+      : positionsOnGrid = [_startingPoint(_gridSidesLength)];
 
   // getters
-  int get head => indexes.first;
-  int get tail => indexes.last;
-  int get length => indexes.length;
+  int get head => positionsOnGrid.first;
+  int get tail => positionsOnGrid.last;
+  int get size => positionsOnGrid.length;
 
   // static functions
-  static int centerSnake(int gridSides) =>
-      ((gridSides + 1 - gridSides % 2) * gridSides / 2 - 1).ceil();
+  static int _startingPoint(final int gridSidesLength) =>
+      ((gridSidesLength + 1 - gridSidesLength % 2) * gridSidesLength / 2 - 1)
+          .ceil();
 
   // functions
-  void eat(int target) => _temp.add(target);
-
-  bool isOn(int target) => head == target;
-
-  bool contains(int target) => indexes.contains(target);
-
-  bool eatsHimself() => indexes.getRange(1, indexes.length).contains(head);
-
-  void updatePosition(Direction direction) {
-    updateSize();
-    for (int i = length - 1; i > 0; i--) {
-      indexes[i] = indexes[i - 1];
+  void moveSnake(final Direction direction) {
+    moveBody();
+    if (_eatenTargets.isNotEmpty && _eatenTargets.first == tail) {
+      positionsOnGrid.add(_eatenTargets.removeAt(0));
     }
+    positionsOnGrid[0] = moveHead(direction);
+    if (eatsHimself()) throw CollisionException();
+  }
+
+  int moveHead(final Direction direction) {
     switch (direction) {
       case Direction.right:
-        {
-          if ((head + 1) % _gridSides == 0) throw Exception('Collision!');
-          indexes[0]++;
+        if ((head + 1) % _gridSidesLength == 0) {
+          throw CollisionException();
         }
-        break;
+        return positionsOnGrid[0] + 1;
       case Direction.left:
-        {
-          if ((head) % _gridSides == 0) throw Exception('Collision!');
-          indexes[0]--;
+        if (head % _gridSidesLength == 0) {
+          throw CollisionException();
         }
-        break;
+        return positionsOnGrid[0] - 1;
       case Direction.up:
-        indexes[0] = indexes.first - _gridSides;
-        break;
+        if (head - _gridSidesLength < 0) {
+          throw CollisionException();
+        }
+        return head - _gridSidesLength;
       case Direction.down:
-        indexes[0] = indexes.first + _gridSides;
-        break;
+        if (head + _gridSidesLength >= _gridSidesLength * _gridSidesLength) {
+          throw CollisionException();
+        }
+        return head + _gridSidesLength;
       default:
-        break;
+        throw Exception('$direction is not implemented');
     }
   }
 
-  void updateSize() {
-    if (_temp.isNotEmpty && _temp.first == tail) {
-      indexes.add(_temp.removeAt(0));
+  void moveBody() {
+    for (int i = size - 1; i > 0; i--) {
+      positionsOnGrid[i] = positionsOnGrid[i - 1];
     }
   }
+
+  bool contains(final int target) => positionsOnGrid.contains(target);
+
+  bool digests(final int target) => _eatenTargets.contains(target);
+
+  bool isOn(final int target) => head == target;
+
+  void eats(final int target) => _eatenTargets.add(target);
+
+  bool eatsHimself() => positionsOnGrid.getRange(1, size).contains(head);
 
   void reset() {
-    indexes.clear();
-    _temp.clear();
-    indexes.add(centerSnake(_gridSides));
+    positionsOnGrid.clear();
+    _eatenTargets.clear();
+    positionsOnGrid.add(_startingPoint(_gridSidesLength));
   }
 }

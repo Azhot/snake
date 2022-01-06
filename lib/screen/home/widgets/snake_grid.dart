@@ -1,5 +1,9 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:snake/screen/home/utils/brick_type.dart';
+import 'package:snake/screen/home/utils/collision_exception.dart';
 import 'package:snake/screen/home/utils/direction.dart';
 import 'package:snake/screen/home/utils/snake.dart';
 import 'package:snake/screen/home/widgets/snake_brick.dart';
@@ -8,13 +12,15 @@ import 'package:snake/shared/snake_colors.dart';
 
 class SnakeGrid extends StatefulWidget {
   // variables
-  final int _sides;
-  final Snake _snake;
+  final int _sidesLength;
   final SnakeGridController _gridController;
 
   // constructors
-  const SnakeGrid(this._sides, this._snake, this._gridController, {Key? key})
-      : super(key: key);
+  const SnakeGrid(
+    this._sidesLength,
+    this._gridController, {
+    Key? key,
+  }) : super(key: key);
 
   // overrides
   @override
@@ -25,21 +31,22 @@ class SnakeGrid extends StatefulWidget {
 class _SnakeGridState extends State<SnakeGrid> {
   // variables
   late final List<SnakeBrickType> _grid;
-
-  // static functions
-  static List<SnakeBrickType> makeEmptyGrid(int sides) =>
-      List.generate(sides * sides, (index) => SnakeBrickType.empty);
+  late final Snake _snake;
+  late final Random _random;
+  late int _target;
 
   // overrides
   @override
   void initState() {
     super.initState();
-    _grid = makeEmptyGrid(widget._sides);
-    widget._gridController.showSnake = showSnake;
+    _grid = List.filled(
+        widget._sidesLength * widget._sidesLength, SnakeBrickType.empty);
+    _snake = Snake(widget._sidesLength);
+    _random = Random();
+    _target = createNewTarget();
     widget._gridController.moveSnake = moveSnake;
-    widget._gridController.showTarget = showTarget;
     widget._gridController.reset = reset;
-    showSnake();
+    displaySnake();
   }
 
   @override
@@ -50,45 +57,67 @@ class _SnakeGridState extends State<SnakeGrid> {
               color: SnakeColors.primary,
               width: 1,
             )),
-        child: Column(children: makeSnakeRows()),
+        child: Column(children: makeRows()),
       );
 
   // functions
-  List<Row> makeSnakeRows() => [
-        for (int i = 0; i < widget._sides; i++)
+  List<Row> makeRows() => [
+        for (int i = 0; i < widget._sidesLength; i++)
           Row(
-            children: SnakeBrick.makeSnakeBricks(
-                _grid.getRange(i * widget._sides, ((i + 1) * widget._sides))),
+            children: SnakeBrick.makeSnakeBricks(_grid.getRange(
+                i * widget._sidesLength, ((i + 1) * widget._sidesLength))),
           )
       ];
 
-  void showSnake() => setState(() {
-        _grid[widget._snake.head] = SnakeBrickType.head;
-        if (widget._snake.length <= 1) return;
-        _grid[widget._snake.tail] = SnakeBrickType.tail;
-        if (widget._snake.length <= 2) return;
-        for (int i = 1; i < widget._snake.length - 2; i++) {
-          _grid[widget._snake.indexes[i]] = SnakeBrickType.body;
-        }
-      });
-
-  void moveSnake(Direction direction) => setState(() {
-        _grid[widget._snake.tail] = SnakeBrickType.empty;
+  void moveSnake(final Direction direction) => setState(() {
+        _grid[_snake.tail] = SnakeBrickType.empty;
         try {
-          widget._snake.updatePosition(direction);
-        } catch (e) {
-          throw Exception('End of game');
+          _snake.moveSnake(direction);
+        } on CollisionException {
+          snakeDies();
+          throw CollisionException();
         }
-        showSnake();
+        displaySnake();
+        if (_snake.isOn(_target)) {
+          _snake.eats(_target);
+          _target = createNewTarget();
+        }
+        displayTarget();
       });
 
-  void showTarget(int index) => setState(() {
-        _grid[index] = SnakeBrickType.target;
-      });
+  int createNewTarget() {
+    int target = _random.nextInt(_grid.length);
+    return !_snake.contains(target) ? target : createNewTarget();
+  }
+
+  void displayTarget() => _grid[_target] = SnakeBrickType.target;
+
+  void displaySnake() {
+    for (int i = 1; i < _snake.size - 1; i++) {
+      _grid[_snake.positionsOnGrid[i]] =
+          _snake.digests(_snake.positionsOnGrid[i])
+              ? SnakeBrickType.eaten
+              : SnakeBrickType.body;
+    }
+    _grid[_snake.head] = SnakeBrickType.head;
+    if (_snake.size > 1) {
+      _grid[_snake.tail] = SnakeBrickType.tail;
+    }
+  }
 
   void reset() => setState(() {
-        for (int i = 0; i < _grid.length - 1; i++) {
+        for (int i = 0; i < _grid.length; i++) {
           _grid[i] = SnakeBrickType.empty;
         }
+        _snake.reset();
+        displaySnake();
+      });
+
+  void snakeDies() => setState(() {
+        HapticFeedback.heavyImpact();
+        for (int i = 0; i < _snake.size; i++) {
+          _grid[_snake.positionsOnGrid[i]] = SnakeBrickType.dead;
+        }
+        _grid[_target] = SnakeBrickType.empty;
       });
 }

@@ -32,6 +32,10 @@ class SnakeBrick extends StatelessWidget {
         return SnakeColors.green;
       case SnakeBrickType.target:
         return SnakeColors.target;
+      case SnakeBrickType.eaten:
+        return SnakeColors.green;
+      case SnakeBrickType.dead:
+        return SnakeColors.primaryLight;
       default:
         return SnakeColors.primaryDark;
     }
