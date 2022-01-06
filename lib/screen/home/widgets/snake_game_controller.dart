@@ -26,27 +26,28 @@ class SnakeGameController extends StatelessWidget {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [button(goUp, Icons.keyboard_arrow_up)],
+            children: [button(goUp, Icons.keyboard_arrow_up, 80)],
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              button(goLeft, Icons.keyboard_arrow_left),
+              button(goLeft, Icons.keyboard_arrow_left, 80),
               Padding(
                 padding: const EdgeInsets.all(8),
-                child: button(start, Icons.play_arrow),
+                child: button(start, Icons.play_arrow, 64),
               ),
-              button(goRight, Icons.keyboard_arrow_right)
+              button(goRight, Icons.keyboard_arrow_right, 80)
             ],
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [button(goDown, Icons.keyboard_arrow_down)],
+            children: [button(goDown, Icons.keyboard_arrow_down, 80)],
           ),
         ],
       );
 
-  Widget button(void Function() onTap, IconData iconData) => InkWell(
+  Widget button(void Function() onTap, IconData iconData, double size) =>
+      InkWell(
         borderRadius: BorderRadius.circular(16),
         splashColor: SnakeColors.primaryLight,
         highlightColor: SnakeColors.primaryLight,
@@ -58,7 +59,7 @@ class SnakeGameController extends StatelessWidget {
           decoration: BoxDecoration(
               border: Border.all(color: SnakeColors.primaryLight),
               borderRadius: BorderRadius.circular(18)),
-          child: Icon(iconData, color: Colors.green, size: 64),
+          child: Icon(iconData, color: Colors.green, size: size),
         ),
       );
 }

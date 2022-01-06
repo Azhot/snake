@@ -57,7 +57,7 @@ class _SnakeHomePageState extends State<SnakeHomePage> {
                 Text('snake',
                     style: GoogleFonts.pressStart2p(
                       color: Colors.green,
-                      fontSize: 46,
+                      fontSize: 64,
                     )),
                 const SizedBox(height: 32),
                 Expanded(
