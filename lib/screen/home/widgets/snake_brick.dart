@@ -13,7 +13,8 @@ class SnakeBrick extends StatelessWidget {
   Widget build(BuildContext context) => Expanded(
         child: AspectRatio(
           aspectRatio: 1,
-          child: Container(
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 96),
             color: selectColor(),
             margin: const EdgeInsets.all(0.1),
           ),

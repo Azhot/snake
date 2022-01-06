@@ -13,7 +13,7 @@ import 'package:snake/shared/snake_colors.dart';
 class SnakeHomePage extends StatefulWidget {
   // const
   static const int _gridSides = 13;
-  static const int _milliseconds = 200;
+  static const int _milliseconds = 192;
 
   // constructors
   const SnakeHomePage({Key? key}) : super(key: key);
