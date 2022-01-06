@@ -94,10 +94,9 @@ class _SnakeGridState extends State<SnakeGrid> {
 
   void displaySnake() {
     for (int i = 1; i < _snake.size - 1; i++) {
-      _grid[_snake.positionsOnGrid[i]] =
-          _snake.digests(_snake.positionsOnGrid[i])
-              ? SnakeBrickType.eaten
-              : SnakeBrickType.body;
+      _grid[_snake.positionAt(i)] = _snake.digests(_snake.positionAt(i))
+          ? SnakeBrickType.eaten
+          : SnakeBrickType.body;
     }
     _grid[_snake.head] = SnakeBrickType.head;
     if (_snake.size > 1) {
@@ -116,7 +115,7 @@ class _SnakeGridState extends State<SnakeGrid> {
   void snakeDies() => setState(() {
         HapticFeedback.heavyImpact();
         for (int i = 0; i < _snake.size; i++) {
-          _grid[_snake.positionsOnGrid[i]] = SnakeBrickType.dead;
+          _grid[_snake.positionAt(i)] = SnakeBrickType.dead;
         }
         _grid[_target] = SnakeBrickType.empty;
       });

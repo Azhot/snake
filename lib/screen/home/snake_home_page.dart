@@ -9,6 +9,7 @@ import 'package:snake/screen/home/widgets/snake_game_controller.dart';
 import 'package:snake/screen/home/widgets/snake_grid.dart';
 import 'package:snake/screen/home/widgets/snake_grid_controller.dart';
 import 'package:snake/shared/snake_colors.dart';
+import 'package:snake/shared/strings.dart';
 
 class SnakeHomePage extends StatefulWidget {
   // const
@@ -54,7 +55,7 @@ class _SnakeHomePageState extends State<SnakeHomePage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('snake',
+                Text(Strings.appName,
                     style: GoogleFonts.pressStart2p(
                       color: Colors.green,
                       fontSize: 64,

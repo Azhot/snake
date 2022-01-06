@@ -3,18 +3,18 @@ import 'package:snake/screen/home/utils/direction.dart';
 
 class Snake {
   // variables
-  final List<int> positionsOnGrid;
+  final List<int> _positionsOnGrid;
   final List<int> _eatenTargets = [];
   final int _gridSidesLength;
 
   // constructors
   Snake(this._gridSidesLength)
-      : positionsOnGrid = [_startingPoint(_gridSidesLength)];
+      : _positionsOnGrid = [_startingPoint(_gridSidesLength)];
 
   // getters
-  int get head => positionsOnGrid.first;
-  int get tail => positionsOnGrid.last;
-  int get size => positionsOnGrid.length;
+  int get head => _positionsOnGrid.first;
+  int get tail => _positionsOnGrid.last;
+  int get size => _positionsOnGrid.length;
 
   // static functions
   static int _startingPoint(final int gridSidesLength) =>
@@ -25,9 +25,9 @@ class Snake {
   void moveSnake(final Direction direction) {
     moveBody();
     if (_eatenTargets.isNotEmpty && _eatenTargets.first == tail) {
-      positionsOnGrid.add(_eatenTargets.removeAt(0));
+      _positionsOnGrid.add(_eatenTargets.removeAt(0));
     }
-    positionsOnGrid[0] = moveHead(direction);
+    _positionsOnGrid[0] = moveHead(direction);
     if (eatsHimself()) throw CollisionException();
   }
 
@@ -37,12 +37,12 @@ class Snake {
         if ((head + 1) % _gridSidesLength == 0) {
           throw CollisionException();
         }
-        return positionsOnGrid[0] + 1;
+        return _positionsOnGrid[0] + 1;
       case Direction.left:
         if (head % _gridSidesLength == 0) {
           throw CollisionException();
         }
-        return positionsOnGrid[0] - 1;
+        return _positionsOnGrid[0] - 1;
       case Direction.up:
         if (head - _gridSidesLength < 0) {
           throw CollisionException();
@@ -60,11 +60,13 @@ class Snake {
 
   void moveBody() {
     for (int i = size - 1; i > 0; i--) {
-      positionsOnGrid[i] = positionsOnGrid[i - 1];
+      _positionsOnGrid[i] = _positionsOnGrid[i - 1];
     }
   }
 
-  bool contains(final int target) => positionsOnGrid.contains(target);
+  int positionAt(int index) => _positionsOnGrid[index];
+
+  bool contains(final int target) => _positionsOnGrid.contains(target);
 
   bool digests(final int target) => _eatenTargets.contains(target);
 
@@ -72,11 +74,11 @@ class Snake {
 
   void eats(final int target) => _eatenTargets.add(target);
 
-  bool eatsHimself() => positionsOnGrid.getRange(1, size).contains(head);
+  bool eatsHimself() => _positionsOnGrid.getRange(1, size).contains(head);
 
   void reset() {
-    positionsOnGrid.clear();
+    _positionsOnGrid.clear();
     _eatenTargets.clear();
-    positionsOnGrid.add(_startingPoint(_gridSidesLength));
+    _positionsOnGrid.add(_startingPoint(_gridSidesLength));
   }
 }
