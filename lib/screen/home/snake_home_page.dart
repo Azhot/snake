@@ -1,42 +1,48 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:snake/screen/home/widgets/snake_grid.dart';
 import 'package:snake/screen/home/utils/collision_exception.dart';
 import 'package:snake/screen/home/utils/direction.dart';
+import 'package:snake/screen/home/utils/snake.dart';
 import 'package:snake/screen/home/widgets/snake_game_controller.dart';
-import 'package:snake/screen/home/widgets/snake_grid.dart';
-import 'package:snake/screen/home/widgets/snake_grid_controller.dart';
 import 'package:snake/shared/snake_colors.dart';
 import 'package:snake/shared/strings.dart';
 
 class SnakeHomePage extends StatefulWidget {
-  // const
-  static const int _gridSides = 13;
-  static const int _milliseconds = 192;
-
   // constructors
   const SnakeHomePage({Key? key}) : super(key: key);
 
-  // overrides
   @override
   State<SnakeHomePage> createState() => _SnakeHomePageState();
 }
 
-// state class
 class _SnakeHomePageState extends State<SnakeHomePage> {
+  // configurables
+  static const int _gridSideSize = 15;
+  static const int _milliseconds = 192;
+
   // variables
-  late final SnakeGridController _gridController;
-  late Direction _direction;
+  late final Random _random;
   Timer? _timer;
+  late Snake _snake;
+  late int _target;
+  late Direction _direction;
+
+  // getters
+  int get _gridSize => _gridSideSize * _gridSideSize;
 
   // overrides
   @override
   void initState() {
     super.initState();
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-    _gridController = SnakeGridController();
+    _random = Random();
+    _snake = Snake(_gridSideSize);
+    _target = -1;
     _direction = Direction.right;
   }
 
@@ -65,7 +71,7 @@ class _SnakeHomePageState extends State<SnakeHomePage> {
                     child: Center(
                   child: AspectRatio(
                     aspectRatio: 1,
-                    child: SnakeGrid(SnakeHomePage._gridSides, _gridController),
+                    child: SnakeGrid(_gridSideSize, _snake, _target),
                   ),
                 )),
                 const SizedBox(height: 16),
@@ -83,41 +89,50 @@ class _SnakeHomePageState extends State<SnakeHomePage> {
       );
 
   // functions
+  int createNewTarget() {
+    int target = _random.nextInt(_gridSize);
+    return !_snake.contains(target) ? target : createNewTarget();
+  }
+
   void start() {
     if (_timer?.isActive == true) return;
     reset();
-    gameLoop();
+    var prevDir = _direction;
+    _timer = Timer.periodic(
+        const Duration(milliseconds: _milliseconds),
+        (timer) => {
+              setState(() {
+                try {
+                  prevDir = checkedDirection(prevDir, _direction);
+                  _snake.moveSnake(prevDir);
+                  if (_snake.isOn(_target)) {
+                    _snake.eats(_target);
+                    _target = createNewTarget();
+                  }
+                  if (_snake.eatsHimself()) {
+                    _snake.isDead = true;
+                    timer.cancel();
+                  }
+                } on CollisionException {
+                  _snake.isDead = true;
+                  timer.cancel();
+                }
+              })
+            });
   }
 
-  void gameLoop() {
-    var tempDir = _direction;
-    _timer = Timer.periodic(
-        const Duration(milliseconds: SnakeHomePage._milliseconds), (timer) {
-      // todo: use provider to provide direction ?
-      try {
-        switch (tempDir) {
-          case Direction.right:
-          case Direction.left:
-            if (_direction != Direction.right && _direction != Direction.left) {
-              tempDir = _direction;
-            }
-            break;
-          case Direction.up:
-          case Direction.down:
-            if (_direction != Direction.up && _direction != Direction.down) {
-              tempDir = _direction;
-            }
-            break;
-        }
-        _gridController.moveSnake?.call(tempDir);
-      } on CollisionException {
-        timer.cancel();
-      }
-    });
-  }
+  Direction checkedDirection(Direction tempDir, Direction direction) =>
+      (((tempDir == Direction.right || tempDir == Direction.left) &&
+                  (direction == Direction.right ||
+                      direction == Direction.left)) ||
+              ((tempDir == Direction.up || tempDir == Direction.down) &&
+                  (direction == Direction.up || direction == Direction.down)))
+          ? tempDir
+          : direction;
 
   void reset() {
-    _gridController.reset?.call();
+    _snake = Snake(_gridSideSize);
+    _target = createNewTarget();
     _direction = Direction.right;
   }
 }

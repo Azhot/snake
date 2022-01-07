@@ -41,7 +41,4 @@ class SnakeBrick extends StatelessWidget {
         return SnakeColors.primaryDark;
     }
   }
-
-  static List<SnakeBrick> makeSnakeBricks(Iterable<SnakeBrickType> row) =>
-      [for (SnakeBrickType type in row) SnakeBrick(type)];
 }
