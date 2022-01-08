@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:snake/screen/home/utils/collision_exception.dart';
 import 'package:snake/screen/home/utils/direction.dart';
 
@@ -6,7 +7,7 @@ class Snake {
   final List<int> _positionsOnGrid;
   final List<int> _eatenTargets = [];
   final int _gridSidesLength;
-  bool isDead = false;
+  bool _isDead = false;
 
   // constructors
   Snake(this._gridSidesLength)
@@ -16,6 +17,7 @@ class Snake {
   int get head => _positionsOnGrid.first;
   int get tail => _positionsOnGrid.last;
   int get size => _positionsOnGrid.length;
+  bool get isDead => _isDead;
 
   // static functions
   static int _startingPoint(final int gridSidesLength) =>
@@ -23,12 +25,14 @@ class Snake {
           .ceil();
 
   // functions
+  /// Throws a [CollisionException] if snake moves out of the grid it is attached to.
   void moveSnake(final Direction direction) {
     _moveBody();
     _addDigestedTargets();
     _positionsOnGrid[0] = _moveHead(direction);
   }
 
+  /// Throws a [CollisionException] if head moves out of the grid [Snake] is attached to.
   int _moveHead(final Direction direction) {
     switch (direction) {
       case Direction.right:
@@ -86,4 +90,9 @@ class Snake {
   void eats(final int target) => _eatenTargets.add(target);
 
   bool eatsHimself() => _positionsOnGrid.getRange(1, size).contains(head);
+
+  void dies() {
+    _isDead = true;
+    HapticFeedback.heavyImpact();
+  }
 }

@@ -89,9 +89,9 @@ class _SnakeGamePageState extends State<SnakeGamePage> {
       );
 
   // functions
-  int createNewTarget() {
+  int newTarget() {
     int target = Random().nextInt(_gridSize);
-    return !_snake.contains(target) ? target : createNewTarget();
+    return !_snake.contains(target) ? target : newTarget();
   }
 
   void start() {
@@ -105,14 +105,11 @@ class _SnakeGamePageState extends State<SnakeGamePage> {
                   _snake.moveSnake(_dirController.direction);
                   if (_snake.isOn(_target)) {
                     _snake.eats(_target);
-                    _target = createNewTarget();
+                    _target = newTarget();
                   }
-                  if (_snake.eatsHimself()) {
-                    _snake.isDead = true;
-                    timer.cancel();
-                  }
+                  if (_snake.eatsHimself()) throw CollisionException();
                 } on CollisionException {
-                  _snake.isDead = true;
+                  _snake.dies();
                   timer.cancel();
                 }
               })
@@ -121,6 +118,6 @@ class _SnakeGamePageState extends State<SnakeGamePage> {
 
   void reset() {
     _snake = Snake(_gridSideSize);
-    _target = createNewTarget();
+    _target = newTarget();
   }
 }
