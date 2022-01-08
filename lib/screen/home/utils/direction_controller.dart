@@ -39,4 +39,10 @@ class DirectionController {
                   (next == Direction.up || next == Direction.down)))
           ? old
           : next;
+
+  void reset(final Direction start) {
+    _next = start;
+    _current = start;
+    _buffer = start;
+  }
 }

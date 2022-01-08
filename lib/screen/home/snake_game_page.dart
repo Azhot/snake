@@ -119,5 +119,6 @@ class _SnakeGamePageState extends State<SnakeGamePage> {
   void reset() {
     _snake = Snake(_gridSideSize);
     _target = newTarget();
+    _dirController.reset(Direction.right);
   }
 }
