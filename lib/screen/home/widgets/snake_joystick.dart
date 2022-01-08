@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:snake/shared/snake_colors.dart';
 
-class SnakeGameController extends StatelessWidget {
+class SnakeJoystick extends StatelessWidget {
   // variables
   final Function() start;
   final Function() goRight;
@@ -11,7 +11,7 @@ class SnakeGameController extends StatelessWidget {
   final Function() goDown;
 
   // constructors
-  const SnakeGameController(
+  const SnakeJoystick(
       {required this.start,
       required this.goRight,
       required this.goLeft,
@@ -46,7 +46,11 @@ class SnakeGameController extends StatelessWidget {
         ],
       );
 
-  Widget button(void Function() onTap, IconData iconData, double size) =>
+  Widget button(
+    final void Function() onTap,
+    final IconData iconData,
+    final double size,
+  ) =>
       InkWell(
         borderRadius: BorderRadius.circular(16),
         splashColor: SnakeColors.primaryLight,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:snake/shared/strings.dart';
-import 'package:snake/screen/home/snake_home_page.dart';
+import 'package:snake/screen/home/snake_game_page.dart';
 
 class SnakeApp extends StatelessWidget {
   // constructors
@@ -11,6 +11,6 @@ class SnakeApp extends StatelessWidget {
   Widget build(BuildContext context) => const MaterialApp(
         debugShowCheckedModeBanner: false,
         title: Strings.appName,
-        home: SnakeHomePage(),
+        home: SnakeGamePage(),
       );
 }
