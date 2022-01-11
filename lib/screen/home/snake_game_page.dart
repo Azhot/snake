@@ -57,13 +57,12 @@ class _SnakeGamePageState extends State<SnakeGamePage> {
         backgroundColor: SnakeColors.primaryDark,
         body: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(32),
+            padding: const EdgeInsets.fromLTRB(32, 32, 32, 16),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(Strings.appName,
                     style: GoogleFonts.pressStart2p(
-                      color: Colors.green,
+                      color: SnakeColors.green,
                       fontSize: 64,
                     )),
                 const SizedBox(height: 32),
@@ -74,7 +73,7 @@ class _SnakeGamePageState extends State<SnakeGamePage> {
                     child: SnakeGrid(_gridSideSize, _snake, _target),
                   ),
                 )),
-                const SizedBox(height: 16),
+                const SizedBox(height: 32),
                 SnakeJoystick(
                   start: start,
                   goRight: () => _dirController.direction = Direction.right,

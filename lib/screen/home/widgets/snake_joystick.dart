@@ -62,8 +62,8 @@ class SnakeJoystick extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
               border: Border.all(color: SnakeColors.primaryLight),
-              borderRadius: BorderRadius.circular(18)),
-          child: Icon(iconData, color: Colors.green, size: size),
+              borderRadius: BorderRadius.circular(16)),
+          child: Icon(iconData, color: SnakeColors.green, size: size),
         ),
       );
 }
